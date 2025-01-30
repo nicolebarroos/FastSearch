@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  fastsearch-api:
+    build: .
+    container_name: fastsearch-api
+    ports:
+      - "8000:8000"
+    depends_on:
+      - elasticsearch
+    environment:
+      - ELASTICSEARCH_HOST=http://elasticsearch:9200
+    networks:
+      - fastsearch-net
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.3
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    networks:
+      - fastsearch-net
+
+networks:
+  fastsearch-net:
+    driver: bridge

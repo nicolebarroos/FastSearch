@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "fastsearch"
+version = "0.1.0"
+description = ""
+authors = ["Nicole Barros"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.115.8"
+uvicorn = "^0.34.0"
+elasticsearch = "^8.17.1"
+requests = "^2.32.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
