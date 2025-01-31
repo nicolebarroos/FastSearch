@@ -1,36 +1,50 @@
-from app.domain.entities.product import Product
+from elasticsearch import Elasticsearch
 from app.domain.interfaces.i_product import ProductRepositoryInterface
-from app.infrastructure.elasticsearch import es
+from app.domain.entities.product import Product
 
 class ElasticsearchProductRepository(ProductRepositoryInterface):
-    """Implementação do repositório usando Elasticsearch"""
+    """Repositório que interage com o Elasticsearch"""
+    
+    def __init__(self):
+        self.es = Elasticsearch("http://elasticsearch:9200")
+        self.index = "products"
 
-    def save(self, produto: Product):
-        doc = produto.dict()
-        res = es.index(index="products", body=doc)
-        return {"message": "Produto adicionado!", "id": res["_id"]}
+    def save(self, product: Product):
+        """Salva um produto no Elasticsearch"""
+        data = {
+            "name": product.name,
+            "name_suggest": {  # 🔹 Garante que autocomplete funcione corretamente
+                "input": [product.name]
+            },
+            "description": product.description,
+            "price": product.price,
+            "category": product.category,
+            "image": product.image
+        }
+        return self.es.index(index=self.index, body=data)
 
     def search_by_text(self, term: str):
+        """Busca produtos por nome ou descrição"""
         query = {
-            "query": {
-                "multi_match": {
-                    "query": term,
-                    "fields": ["name", "description"]
-                }
+            "bool": {
+                "must": [{"multi_match": {"query": term, "fields": ["name", "description"]}}]
             }
         }
-        res = es.search(index="products", body=query)
-        products = [hit["_source"] for hit in res["hits"]["hits"]]
-        return {"products": products}
+        res = self.es.search(index=self.index, body={"query": query}, size=50)
+        return [hit["_source"] for hit in res["hits"]["hits"]]
 
     def autocomplete(self, term: str):
+        """Retorna sugestões de produtos"""
         query = {
-            "query": {
-                "match_phrase_prefix": {
-                    "name": term
+            "suggest": {
+                "product-suggestion": {
+                    "prefix": term,
+                    "completion": {
+                        "field": "name_suggest"
+                    }
                 }
             }
         }
-        res = es.search(index="products", body=query)
-        suggestions = [hit["_source"]["name"] for hit in res["hits"]["hits"]]
-        return {"sugestoes": suggestions}
+        res = self.es.search(index=self.index, body=query)
+        suggestions = [option["text"] for option in res["suggest"]["product-suggestion"][0]["options"]]
+        return suggestions

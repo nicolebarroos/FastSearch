@@ -74,32 +74,8 @@ Abra no navegador:
 🔗 **http://127.0.0.1:8000/docs**  
 Se a API estiver rodando, você verá a **documentação interativa**.
 
----
 
-## 📌 Rodando o Script para Inserir Produtos
-O script **`add_products.py`** está incluído no container, mas **não roda automaticamente**. Para populá-lo, siga os passos:
-
-### **1️⃣ Acessar o Container da API**
-```sh
-docker exec -it fastsearch-api sh
-```
-Agora você está dentro do container **FastAPI**.
-
-### **2️⃣ Rodar o Script**
-Dentro do container, navegue até a pasta onde o script foi copiado:
-```sh
-cd /app
-```
-Agora, execute o script:
-```sh
-poetry run python add_products.py
-```
-Se você **não estiver usando Poetry**, tente rodar com Python puro:
-```sh
-python add_products.py
-```
-
-✅ Se tudo estiver correto, o script irá começar a inserir os produtos!
+✅ Após o container subir, script de inserção de produtos irá começar!
 
 ### **3️⃣ Verificar se os Produtos Foram Inseridos**
 Agora, saia do container e teste se os produtos estão no Elasticsearch.
@@ -111,7 +87,10 @@ exit
 
 Agora, faça uma requisição para buscar produtos:
 ```sh
-curl -X GET "http://127.0.0.1:8000/produtos/busca/?q=notebook"
+curl -X GET "http://127.0.0.1:8000/produtos/busca/?q=Laptop"
+curl -X GET "http://127.0.0.1:8000/produtos/autocomplete/?q=Smar"
+curl -X GET "http://127.0.0.1:8000/produtos/busca/?q=Laptop&price_min=1000&price_max=3000"
+
 ```
 Se os produtos foram inseridos corretamente, a API **retornará a lista de produtos cadastrados**. 🚀
 

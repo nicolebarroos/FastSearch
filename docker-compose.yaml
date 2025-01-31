@@ -1,29 +1,27 @@
 version: '3.8'
 
 services:
-  fastsearch-api:
-    build: .
-    container_name: fastsearch-api
-    ports:
-      - "8000:8000"
-    depends_on:
-      - elasticsearch
-    environment:
-      - ELASTICSEARCH_HOST=http://elasticsearch:9200
-    networks:
-      - fastsearch-net
-
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.3
     container_name: elasticsearch
     environment:
       - discovery.type=single-node
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
     ports:
       - "9200:9200"
-    networks:
-      - fastsearch-net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      retries: 5
+      start_period: 20s
 
-networks:
-  fastsearch-net:
-    driver: bridge
+  fastsearch-api:
+    build: .
+    container_name: fastsearch-api
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    environment:
+      - ELASTICSEARCH_HOST=http://elasticsearch:9200

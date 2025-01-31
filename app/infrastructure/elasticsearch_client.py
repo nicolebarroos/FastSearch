@@ -13,6 +13,7 @@ def create_indice():
             "mappings": {
                 "properties": {
                     "name": {"type": "text"},
+                    "name_suggest": {"type": "completion"},
                     "description": {"type": "text"},
                     "price": {"type": "float"}
                 }

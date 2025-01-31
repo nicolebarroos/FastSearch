@@ -1,8 +1,5 @@
-
-
 from app.domain.entities.product import Product
 from app.domain.interfaces.i_product import ProductRepositoryInterface
-
 
 class AddProductUseCase:
     """Caso de uso para adicionar produtos"""

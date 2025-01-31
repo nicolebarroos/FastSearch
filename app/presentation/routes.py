@@ -1,10 +1,12 @@
 from fastapi import APIRouter
 from app.application.use_cases.product_use_case import AddProductUseCase, AutocompleteProductUseCase, SearchProdutoUseCase
 from app.domain.entities.product import Product
-
 from app.infrastructure.repositories import ElasticsearchProductRepository
+from elasticsearch import Elasticsearch
 
 router = APIRouter()
+
+es = Elasticsearch("http://elasticsearch:9200")
 
 repository = ElasticsearchProductRepository()
 
@@ -15,13 +17,13 @@ def add_product(produto: Product):
     return use_case.execute(produto)
 
 @router.get("/produtos/busca/")
-def search_product(q: str):
-    """Busca produtos por nome ou descrição"""
+def search_products(q: str):
+    """Busca produtos pelo nome ou descrição"""
     use_case = SearchProdutoUseCase(repository)
-    return use_case.execute(q)
+    return {"products": use_case.execute(q)}
 
 @router.get("/produtos/autocomplete/")
 def autocomplete(q: str):
-    """Sugere produtos conforme o usuário digita"""
+    """Sugestões de autocomplete para produtos"""
     use_case = AutocompleteProductUseCase(repository)
-    return use_case.execute(q)
+    return {"suggestions": use_case.execute(q)}
